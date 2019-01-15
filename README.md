@@ -1,3 +1,6 @@
+1.增加了shrink box的实现，
+2.resize image时候，保持长宽比例
+
 Code for the AAAI18 paper [PixelLink: Detecting Scene Text via Instance Segmentation](https://arxiv.org/abs/1801.01315), by Dan Deng, Haifeng Liu, Xuelong Li, and Deng Cai.
 
 Contributions to this repo are welcome, e.g., some other backbone networks (including the model definition and pretrained models).
