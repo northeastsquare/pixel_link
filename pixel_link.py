@@ -376,3 +376,80 @@ def mask_to_bboxes(mask, image_shape =  None, min_area = None,
 
 
 #============================Decode End===============================
+#unti-clockwise
+def shrink_text_box(image, glabel, gbboxes, x1, x2, x3, x4, y1, y2, y3, y4, ratio):
+
+    image_shape = tf.cast(tf.shape(image), dtype = tf.float32)
+    h, w = image_shape[0], image_shape[1]
+    #h, w = tf.shape(image)[0:2]
+    #h = h*x1
+    #image = tf.Print(image, [str(h), str(w), str(image.get_shape()), glabel, gbboxes, x1, x2, x3, x4, y1, y2, y3, y4],\
+    #        "gbboxes, x1, x2, x3, x4, y1, y2, y3, y4:", summarize = 100)
+    #num_char = tf.maximum(1.0*h/w, 1.0*w/h)
+    #box_h =  tf.maximum( (x2-x1), 1.0*h/num_char)
+
+    x1 *= tf.cast(w, x1.dtype)
+    x2 *= tf.cast(w, x2.dtype)
+    x3 *= tf.cast(w, x3.dtype)
+    x4 *= tf.cast(w, x4.dtype)
+    y1 *= tf.cast(h, y1.dtype)
+    y2 *= tf.cast(h, y2.dtype)
+    y3 *= tf.cast(h, y3.dtype)
+    y4 *= tf.cast(h, y4.dtype)
+    box_w = 1.0*(x4-x1+x3-x2)/2
+    box_h = 1.0*(y3-y4+y2-y1)/2
+    box_h = tf.minimum(box_w, box_h)
+    #box_h = tf.Print(box_h, [box_w, box_h], "box_w, box_h", summarize = 20)
+    x1 += box_h*ratio
+    x2 += box_h*ratio
+    x3 -= box_h*ratio
+    x4 -= box_h*ratio
+    y1 += box_h*ratio
+    y4 += box_h*ratio
+    y2 -= box_h*ratio
+    y3 -= box_h*ratio
+    x1 /= tf.cast(w, x1.dtype)
+    x2 /= tf.cast(w, x2.dtype)
+    x3 /= tf.cast(w, x3.dtype)
+    x4 /= tf.cast(w, x4.dtype)
+    y1 /= tf.cast(h, y1.dtype)
+    y2 /= tf.cast(h, y2.dtype)
+    y3 /= tf.cast(h, y3.dtype)
+    y4 /= tf.cast(h, y4.dtype)
+    gbboxes = tf.transpose(tf.stack([tf.minimum(y1,y4), tf.minimum(x1,x2), tf.maximum(y2,y3),  tf.maximum(x3,x4)]))
+
+    return image, glabel, gbboxes, x1, x2, x3, x4, y1, y2, y3, y4
+##unti-clockwise
+def unshrink_text_box_unti_clockwise(boxes, ratio):
+    #print("types:", box)
+    for box in boxes:
+        h = (box[2] - box[0] + box[4] - box[6])/2.0
+        w = (box[7] - box[1] + box[5] - box[3])/2.0
+        box_h = min(w, h)
+        stride = box_h*(1-2.0*ratio)
+        box[0]-=stride
+        box[1]-=stride
+        box[2]-=stride
+        box[3]+=stride
+        box[4]+=stride
+        box[5]+=stride
+        box[6]+=stride
+        box[7]-=stride
+    return boxes
+
+def unshrink_text_box_clockwise(boxes, ratio):
+    #print("types:", box)
+    for box in boxes:
+        w = (box[2] - box[0] + box[4] - box[6])/2.0
+        h = (box[7] - box[1] + box[5] - box[3])/2.0
+        box_h = min(w, h)
+        stride = box_h*(1-2.0*ratio)
+        box[0]-=stride
+        box[1]-=stride
+        box[2]+=stride
+        box[3]-=stride
+        box[4]+=stride
+        box[5]+=stride
+        box[6]-=stride
+        box[7]+=stride
+    return boxes
