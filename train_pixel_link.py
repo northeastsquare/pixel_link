@@ -122,6 +122,8 @@ def create_dataset_batch_queue(dataset):
                                                          'object/oriented_bbox/y3',
                                                          'object/oriented_bbox/y4'
                                                          ])
+        image, glabel, gbboxes, x1, x2, x3, x4, y1, y2, y3, y4 = \
+            pixel_link.shrink_text_box(image, glabel, gbboxes, x1, x2, x3, x4, y1, y2, y3, y4, 0.25)
         gxs = tf.transpose(tf.stack([x1, x2, x3, x4])) #shape = (N, 4)
         gys = tf.transpose(tf.stack([y1, y2, y3, y4]))
         image = tf.identity(image, 'input_image')
